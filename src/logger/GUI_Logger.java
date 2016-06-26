@@ -1,4 +1,5 @@
 package logger;
+import mainframe.GUI_FileConfig;
 import mainframe.GUI_MainFrame;
 
 /* This program is a class which extends JPanel which contains the code for the logger
@@ -13,11 +14,13 @@ import java.awt.event.*;
 import java.awt.*;
 import java.io.*;
 import java.text.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-public class GUI_Logger extends JPanel implements Runnable  {
+public class GUI_Logger extends JPanel implements Runnable {
 	
+	GUI_MainFrame parent_FRA;
 	
 	//JPanel for setting Grid Layout for Radio Buttons and Username
 	JPanel subPanelForRadioPassword;
@@ -39,20 +42,23 @@ public class GUI_Logger extends JPanel implements Runnable  {
 	JScrollPane previousComment_SP;
 	
 	//Variables for where to store files
+	File partLogFilePath;
 	File logFilePath;
 	
 	//Font
 	Font font = new Font("Gill Sans MT",Font.TRUETYPE_FONT,16);
 	
+	
+	ArrayList<User> users = new ArrayList<User>();
 	//Contructor
 	public GUI_Logger(GUI_MainFrame mainframe)
 	{
-		GUI_MainFrame parent_FRA = mainframe;
-		logFilePath = parent_FRA.getLogFilePath();
+		parent_FRA = mainframe;
+		partLogFilePath = parent_FRA.getLogFilePath();
 
 		initialiseGUI();
 		
-		//logFilePath = createLogFile();
+		logFilePath = createLogFile();
 
 	}
 	
@@ -64,14 +70,9 @@ public class GUI_Logger extends JPanel implements Runnable  {
 		//SubPanel for Radio Buttons and Password
 		subPanelForRadioPassword = new JPanel(new GridLayout(1,2));
         subPanelForRadioPassword.add(	initialiseRadioButtons());
-	    subPanelForRadioPassword.add(inisitaliseUsername());
-		
-		//Method call to initalising Send Button
-		initialiseUsername();
-		
-		//Method call to initalising Text Field
-		initialiseTextArea();
-		
+	    subPanelForRadioPassword.add(initialiseUsername());
+		this.add(initialiseTextArea(),BorderLayout.CENTER);
+		this.add(subPanelForRadioPassword, BorderLayout.SOUTH);
 	}
 	
 	private JPanel initialiseRadioButtons()
@@ -132,7 +133,7 @@ public class GUI_Logger extends JPanel implements Runnable  {
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						//saveButtonActivated();
+						saveButtonActivated();
 					}
 				}
 				);
@@ -146,39 +147,73 @@ public class GUI_Logger extends JPanel implements Runnable  {
 		userComment_PAN.setLayout(new BorderLayout());
 		
 		//Edible Text Area for User to Type
-		userComment_TA = new JTextArea(4,100);
+		userComment_TA = new JTextArea(4,50);
 		userComment_TA.setEditable(true);
+		userComment_TA.setLineWrap(true);
+		userComment_TA.setFont(new Font("Gill Sans MT",Font.TRUETYPE_FONT,14));
 		userComment_PAN.add(userComment_TA,BorderLayout.SOUTH);
 		
+		userComment_TA.addKeyListener(new KeyListener()
+				{
+					@Override
+					public void keyTyped(KeyEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void keyPressed(KeyEvent e) {
+					if (e.getKeyCode() ==KeyEvent.VK_ENTER)
+					{
+						saveButtonActivated();
+					}
+						
+					}
+
+					@Override
+					public void keyReleased(KeyEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+				
+			
+				});
+		
 		//Non Edible Text Area for Previously Saved Logs
-		previousComment_TA =  new JTextArea(200,100);
+		previousComment_TA =  new JTextArea(10,50);
 		previousComment_TA.setEditable(false);
+		previousComment_TA.setLineWrap(true);
+		previousComment_TA.setFont(new Font("Gill Sans MT",Font.TRUETYPE_FONT,14));
 		previousComment_SP = new JScrollPane(previousComment_TA);
 		previousComment_SP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		previousComment_SP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	
+		previousComment_SP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		previousComment_SP.setPreferredSize(new Dimension(300,600));
+	    userComment_PAN.add(previousComment_SP,BorderLayout.CENTER);
 	return userComment_PAN;	
 	}
 
 	private String getDateForFile()
 	{
-		DateFormat fileDateFormat = new SimpleDateFormat("dd_MM_yy_HH_mm_ss");
+		DateFormat fileDateFormat = new SimpleDateFormat("dd_MM_yy");
 		Date dateWhenCreated = new Date();
 		return  fileDateFormat.format(dateWhenCreated);
 	}
-	/*
+	
 	public File createLogFile()
 	{
-		String filePathString = logFilePath + "//" + "Log_" + getDateForFile() + ".txt";
+		String filePathString = partLogFilePath + "//" + "Log_" + getDateForFile() + "_" + parent_FRA.getTestingLocation() +  ".txt";
 		logFilePath = new File(filePathString);
 		FileWriter fileCreator;
 		try {
 			fileCreator = new FileWriter(logFilePath);
-			fileCreator.write("");
+			Date currentTime = new Date();
+			DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+			fileCreator.write("HWRacing Test Session \nTesting Location:" + parent_FRA.getTestingLocation()+ "\n" + "Time Created: " + timeFormat.format(currentTime) + "\nTesting Date: " +getDateForFile() + "\n");
 			fileCreator.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showInternalMessageDialog(parent_FRA, "File Save Error.\nPlease select a valid file save location.");
+			GUI_FileConfig fileConfig = new GUI_FileConfig(parent_FRA);
+			createLogFile();
 		}
 
 		return logFilePath;
@@ -206,9 +241,9 @@ private String constructStringToBeWritten()
 	Date currentTime = new Date();
 	String timeAndDate = dateFormat.format(currentTime) + "T" + timeFormat.format(currentTime);
 	
-	return timeAndDate + " - " + checkUserName().getName() + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
+	return timeAndDate + " - " + username_TF.getText() + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
 }
-
+/*
 private User checkUserName()
 {
 	boolean userNameValid = false;
@@ -228,7 +263,7 @@ private User checkUserName()
 	JOptionPane.showMessageDialog(null,"Please a valid User.","User Not Valid",JOptionPane.WARNING_MESSAGE);
 	return null;
 }
-
+*/
 private boolean checkForText()
 {
 	if (userComment_TA.getText().equals(""))
@@ -254,7 +289,7 @@ private String checkForRadioButton()
 //Method activated when Save Button activated
 private void saveButtonActivated()
 {
-	if (checkUserName() !=null && checkForText() == true)
+	if (checkForText() == true && usernameValid() == true)
 	{
 		String textWritten = constructStringToBeWritten();
 		writeLogToFile(textWritten);
@@ -269,7 +304,8 @@ private void clearUserCommentArea()
 
 {
 	username_TF.setText("");
-	userComment_TA.setText("");
+	userComment_TA.setText(" ");
+	userComment_TA.setCaretPosition(0);
 }
 
 private void printToTextArea(String newComment)
@@ -282,24 +318,30 @@ private void printToTextArea(String newComment)
 
 }
 
-private void readUsersIn()
+private void readUsernames() throws IOException
 {
-
-		try {
-			Properties properties = new Properties();
-			FileReader reader = new FileReader(files_F[2]);
-			properties.load(reader);	
-			reader.close();
-			validUsernames = properties.getProperty("user");
-			System.out.println(validUsernames);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	File usernamesFilePath = parent_FRA.getUsernamesFilePath();
+	try {
+		FileReader fileReader = new FileReader(usernamesFilePath);
+		BufferedReader br = new BufferedReader(fileReader);
+		String tempLine;
+		
+		while ((tempLine = br.readLine()) != null )
+		{
+			String [] tempUserString = tempLine.split(",");
+			User tempUser = new User(tempUserString[0],tempUserString[1]);
+			users.add(tempUser);
 		}
 		
 
+	} catch (FileNotFoundException e) {
+		JOptionPane.showMessageDialog(null,"Users File Not Found","No Users Files Found",JOptionPane.WARNING_MESSAGE);
+		System.exit(0);
+	}
+	
 }
-*/
+
+
 //Runnable 
 public void run() {
 	//

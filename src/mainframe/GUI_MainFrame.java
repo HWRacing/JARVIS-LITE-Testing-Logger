@@ -12,6 +12,7 @@ import logger.GUI_Logger;
 import startprogram.StartProgram;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.*;
 
 public class GUI_MainFrame extends JXFrame{
@@ -86,6 +87,7 @@ public class GUI_MainFrame extends JXFrame{
 			this.setIconImage(icon.getImage());
 			//Setting Maximised
 			this.setExtendedState(JXFrame.MAXIMIZED_BOTH);
+			this.setMinimumSize(new Dimension(600,800));
 			this.setVisible(true);
 			
 			//Add Panels
@@ -98,7 +100,7 @@ public class GUI_MainFrame extends JXFrame{
 			//Initialising Status Bar
 			initaliseStatusBar();
 			logger_PAN = new GUI_Logger(this);
-			this.add(logger_PAN);
+			this.add(logger_PAN,BorderLayout.CENTER);
 			
 		}
 		
@@ -129,6 +131,11 @@ public class GUI_MainFrame extends JXFrame{
 
 		public void updateTestingLocation(String location) {
 			testingLocation = location;
+		}
+		
+		public String getTestingLocation()
+		{
+			return testingLocation;
 		}
 
 		public void closeProgram() {
