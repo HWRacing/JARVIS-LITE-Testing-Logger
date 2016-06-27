@@ -84,6 +84,9 @@ public class GUI_FileConfig extends JDialog{
 	ok_BUT.addActionListener(new ActionListener()
 			{
 				public void actionPerformed(ActionEvent e) {
+					if ( !(location_TF.getText().equals("")))
+					{
+					
 					parent_FRA.updateTestingLocation(location_TF.getText());
 					for (int i =0;i<files_F.length;i++)
 					{
@@ -92,6 +95,8 @@ public class GUI_FileConfig extends JDialog{
 					JOptionPane.showMessageDialog(null, "The File Paths are: \nUsername File Path: " + files_F[0] + "\nTesting Log File Path: " + files_F[1] , "File Paths", JOptionPane.INFORMATION_MESSAGE, null);
 					parent_FRA.updateFilesPath(files_F[0],files_F[1]);
 					closeWindow();
+					}else
+						JOptionPane.showMessageDialog(null,"Please enter a testing location.","Invalid Test Location" ,JOptionPane.WARNING_MESSAGE);
 				}
 		;
 			});
@@ -101,6 +106,7 @@ public class GUI_FileConfig extends JDialog{
 				public void actionPerformed(ActionEvent e)
 				{
 					closeWindow();
+					System.exit(0);
 			}
 	});
 	//A

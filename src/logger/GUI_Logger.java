@@ -16,6 +16,7 @@ import java.io.*;
 import java.text.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 
 public class GUI_Logger extends JPanel implements Runnable {
@@ -57,10 +58,12 @@ public class GUI_Logger extends JPanel implements Runnable {
 		partLogFilePath = parent_FRA.getLogFilePath();
 
 		initialiseGUI();
+		readUsernames();
 		
-		logFilePath = createLogFile();
+			logFilePath = createLogFile();
 
 	}
+	
 	
 	
 	//Initialise Components in GUI
@@ -201,17 +204,18 @@ public class GUI_Logger extends JPanel implements Runnable {
 	
 	public File createLogFile()
 	{
+		partLogFilePath = parent_FRA.getLogFilePath();
 		String filePathString = partLogFilePath + "//" + "Log_" + getDateForFile() + "_" + parent_FRA.getTestingLocation() +  ".txt";
 		logFilePath = new File(filePathString);
 		FileWriter fileCreator;
 		try {
-			fileCreator = new FileWriter(logFilePath);
+			fileCreator = new FileWriter(logFilePath,true);
 			Date currentTime = new Date();
 			DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-			fileCreator.write("HWRacing Test Session \nTesting Location:" + parent_FRA.getTestingLocation()+ "\n" + "Time Created: " + timeFormat.format(currentTime) + "\nTesting Date: " +getDateForFile() + "\n");
+			fileCreator.write("HWRacing Test Session" +  System.getProperty( "line.separator" ) + "Testing Location:" + parent_FRA.getTestingLocation()+ System.getProperty( "line.separator" )+ "Time Created: " + timeFormat.format(currentTime) + System.getProperty( "line.separator" ) + "Testing Date: " +getDateForFile() + System.getProperty( "line.separator" ));
 			fileCreator.close();
 		} catch (IOException e) {
-			JOptionPane.showInternalMessageDialog(parent_FRA, "File Save Error.\nPlease select a valid file save location.");
+			JOptionPane.showMessageDialog(null, "Problem with the File Save Location Selected. Please Select Another One");
 			GUI_FileConfig fileConfig = new GUI_FileConfig(parent_FRA);
 			createLogFile();
 		}
@@ -241,29 +245,24 @@ private String constructStringToBeWritten()
 	Date currentTime = new Date();
 	String timeAndDate = dateFormat.format(currentTime) + "T" + timeFormat.format(currentTime);
 	
-	return timeAndDate + " - " + username_TF.getText() + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
+	return timeAndDate + " - " + usernameValid(username_TF.getText()) + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
 }
-/*
-private User checkUserName()
+
+private String usernameValid(String username)
 {
-	boolean userNameValid = false;
-	if (username_TF.getText().equals(""))
-	{
-		JOptionPane.showMessageDialog(null,"Please enter a user.","No User",JOptionPane.WARNING_MESSAGE);
-		return null;
-	}else
-		for (User userTemp: users_U)
-		{
-			if (username_TF.getText().equals(userTemp.getUserName()))
-					{
-						userNameValid = true;
-						return userTemp;		
-					}
-		}
-	JOptionPane.showMessageDialog(null,"Please a valid User.","User Not Valid",JOptionPane.WARNING_MESSAGE);
-	return null;
+ Iterator<User> iter = users.iterator();
+ while (iter.hasNext())
+ {
+	 User tempUser = iter.next();
+	 if (tempUser.getUserName().equals(username))
+	 {
+		 return tempUser.getName() ;
+	 }
+ }
+ return null;
+ 
 }
-*/
+
 private boolean checkForText()
 {
 	if (userComment_TA.getText().equals(""))
@@ -289,13 +288,16 @@ private String checkForRadioButton()
 //Method activated when Save Button activated
 private void saveButtonActivated()
 {
-	if (checkForText() == true && usernameValid() == true)
+	if (checkForText() == true && usernameValid(username_TF.getText()) != null)
 	{
 		String textWritten = constructStringToBeWritten();
 		writeLogToFile(textWritten);
 		printToTextArea(textWritten);
 		clearUserCommentArea();
 		
+	}else if (usernameValid(username_TF.getText()) == null)
+	{
+		JOptionPane.showMessageDialog(null,"Please enter a valid Username.","Invalid Username",JOptionPane.WARNING_MESSAGE);
 	}
 }
 
@@ -303,7 +305,6 @@ private void saveButtonActivated()
 private void clearUserCommentArea()
 
 {
-	username_TF.setText("");
 	userComment_TA.setText(" ");
 	userComment_TA.setCaretPosition(0);
 }
@@ -318,7 +319,7 @@ private void printToTextArea(String newComment)
 
 }
 
-private void readUsernames() throws IOException
+private void readUsernames()
 {
 	File usernamesFilePath = parent_FRA.getUsernamesFilePath();
 	try {
@@ -326,11 +327,16 @@ private void readUsernames() throws IOException
 		BufferedReader br = new BufferedReader(fileReader);
 		String tempLine;
 		
-		while ((tempLine = br.readLine()) != null )
-		{
-			String [] tempUserString = tempLine.split(",");
-			User tempUser = new User(tempUserString[0],tempUserString[1]);
-			users.add(tempUser);
+		try {
+			while ((tempLine = br.readLine()) != null )
+			{
+				String [] tempUserString = tempLine.split(",");
+				User tempUser = new User(tempUserString[0],tempUserString[1]);
+				users.add(tempUser);
+			}
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null,"Users File Not Found","No Users Files Found",JOptionPane.WARNING_MESSAGE);
+			System.exit(0);
 		}
 		
 

@@ -13,6 +13,8 @@ import startprogram.StartProgram;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.*;
 
 public class GUI_MainFrame extends JXFrame{
@@ -31,8 +33,8 @@ public class GUI_MainFrame extends JXFrame{
 	Thread tLogger;
 	
 	//Variables which hold where the log file is to be stored
-     File logFilePath = new File(System.getProperty("user.home")+ "/JARVIS/");
-     File usernamesFilePath = new File(System.getProperty("user.home")+ "/JARVIS/users.txt");
+     File logFilePath = new File(System.getProperty("user.home")+ "/Desktop/" + "/JARVIS/");
+     File usernamesFilePath = new File(System.getProperty("user.home")+ "/Desktop/"  + "/JARVIS/users.txt");
 	String testingLocation;
 	
 	//Menu Bar Variables
@@ -87,8 +89,9 @@ public class GUI_MainFrame extends JXFrame{
 			this.setIconImage(icon.getImage());
 			//Setting Maximised
 			this.setExtendedState(JXFrame.MAXIMIZED_BOTH);
-			this.setMinimumSize(new Dimension(600,800));
+			this.setMinimumSize(new Dimension(700,800));
 			this.setVisible(true);
+			this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 			
 			//Add Panels
 			addPanels();
@@ -138,8 +141,5 @@ public class GUI_MainFrame extends JXFrame{
 			return testingLocation;
 		}
 
-		public void closeProgram() {
-			// TODO Auto-generated method stub
-			System.exit(DISPOSE_ON_CLOSE);
-		}
+		
 }
