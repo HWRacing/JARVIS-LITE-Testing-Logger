@@ -1,6 +1,7 @@
 package logger;
 import mainframe.GUI_FileConfig;
 import mainframe.GUI_MainFrame;
+import reporting.ReportProgram;
 
 /* This program is a class which extends JPanel which contains the code for the logger
  * 
@@ -45,7 +46,7 @@ public class GUI_Logger extends JPanel implements Runnable {
 	//Variables for where to store files
 	File partLogFilePath;
 	File logFilePath;
-	
+	ReportProgram program = new ReportProgram();
 	//Font
 	Font font = new Font("Gill Sans MT",Font.TRUETYPE_FONT,16);
 	
@@ -132,6 +133,16 @@ public class GUI_Logger extends JPanel implements Runnable {
 		username_PAN.add(export_BUT);
 	
 		//Adding Action Listener for the save button
+
+		export_BUT.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				System.out.println("Stuff");
+			}
+		}
+		);
+		
 		messageSave_BUT.addActionListener(new ActionListener()
 				{
 					public void actionPerformed(ActionEvent e)
@@ -140,7 +151,6 @@ public class GUI_Logger extends JPanel implements Runnable {
 					}
 				}
 				);
-		
 		return username_PAN;
 	}
 	
