@@ -1,7 +1,7 @@
 package logger;
 import mainframe.GUI_FileConfig;
 import mainframe.GUI_MainFrame;
-import reporting.ReportProgram;
+import reporting.ReportingProgram;
 
 /* This program is a class which extends JPanel which contains the code for the logger
  * 
@@ -11,6 +11,9 @@ import reporting.ReportProgram;
 
 //Import Java Swing and IO Libraries
 import javax.swing.*;
+
+import com.itextpdf.text.DocumentException;
+
 import java.awt.event.*;
 import java.awt.*;
 import java.io.*;
@@ -35,7 +38,7 @@ public class GUI_Logger extends JPanel implements Runnable {
 	JLabel username_LAB;
 	JTextField username_TF;
 	JButton messageSave_BUT;
-	JButton export_BUT;
+	JButton exportPDF_BUT;
 	
 	//Multiline TextField for Inputting Text
 	JPanel userComment_PAN;
@@ -46,13 +49,15 @@ public class GUI_Logger extends JPanel implements Runnable {
 	//Variables for where to store files
 	File partLogFilePath;
 	File logFilePath;
-	ReportProgram program = new ReportProgram();
 	//Font
 	Font font = new Font("Gill Sans MT",Font.TRUETYPE_FONT,16);
 	
 	
 	ArrayList<User> users = new ArrayList<User>();
 	//Contructor
+	
+	ReportingProgram reportProgram;
+	
 	public GUI_Logger(GUI_MainFrame mainframe)
 	{
 		parent_FRA = mainframe;
@@ -62,6 +67,8 @@ public class GUI_Logger extends JPanel implements Runnable {
 		readUsernames();
 		
 			logFilePath = createLogFile();
+			
+			reportProgram = new ReportingProgram(logFilePath);
 
 	}
 	
@@ -123,25 +130,33 @@ public class GUI_Logger extends JPanel implements Runnable {
 		username_TF.setFont(font);
 		messageSave_BUT = new JButton("Save");
 		messageSave_BUT.setFont(font);
-		export_BUT = new JButton("Export");
-		export_BUT.setFont(font);
+		exportPDF_BUT = new JButton("Export PDF");
+		exportPDF_BUT.setFont(font);
 		
 		//Add Label, Text Field and Button to JPanel
 		username_PAN.add(username_LAB);
 		username_PAN.add(username_TF);
 		username_PAN.add(messageSave_BUT);
-		username_PAN.add(export_BUT);
-	
+		username_PAN.add(exportPDF_BUT);
+		
 		//Adding Action Listener for the save button
-
-		export_BUT.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent e)
-			{
-				System.out.println("Stuff");
-			}
-		}
-		);
+		
+		exportPDF_BUT.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						JOptionPane.showMessageDialog(null, "Run");
+						try {
+							reportProgram.createPDF();
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (DocumentException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+				});
 		
 		messageSave_BUT.addActionListener(new ActionListener()
 				{
@@ -217,12 +232,14 @@ public class GUI_Logger extends JPanel implements Runnable {
 		partLogFilePath = parent_FRA.getLogFilePath();
 		String filePathString = partLogFilePath + "//" + "Log_" + getDateForFile() + "_" + parent_FRA.getTestingLocation() +  ".txt";
 		logFilePath = new File(filePathString);
+		if (logFilePath.exists() == false)
+		{
 		FileWriter fileCreator;
 		try {
 			fileCreator = new FileWriter(logFilePath,true);
 			Date currentTime = new Date();
 			DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-			fileCreator.write("HWRacing Test Session" +  System.getProperty( "line.separator" ) + "Testing Location:" + parent_FRA.getTestingLocation()+ System.getProperty( "line.separator" )+ "Time Created: " + timeFormat.format(currentTime) + System.getProperty( "line.separator" ) + "Testing Date: " +getDateForFile() + System.getProperty( "line.separator" ));
+			fileCreator.write("HWRacing Test Session" +  System.getProperty( "line.separator" ) + "Testing Location:" + parent_FRA.getTestingLocation()+ System.getProperty( "line.separator" ) + "Testing Date: " +getDateForFile() + System.getProperty( "line.separator" ) + "Time Created: " + timeFormat.format(currentTime) + System.getProperty( "line.separator" ));
 			fileCreator.close();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Problem with the File Save Location Selected. Please Select Another One");
@@ -230,8 +247,9 @@ public class GUI_Logger extends JPanel implements Runnable {
 			createLogFile();
 		}
 
-		return logFilePath;
 		}
+		return logFilePath;
+	}
 	
 private void writeLogToFile(String textToBeWritten)
 
@@ -250,12 +268,11 @@ private void writeLogToFile(String textToBeWritten)
 
 private String constructStringToBeWritten()
 {
-	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	Date currentTime = new Date();
-	String timeAndDate = dateFormat.format(currentTime) + "T" + timeFormat.format(currentTime);
+	String time =  timeFormat.format(currentTime);
 	
-	return timeAndDate + " - " + usernameValid(username_TF.getText()) + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
+	return "|" +   time+ " - " + usernameValid(username_TF.getText()) + " - " + (checkForRadioButton()) +  " - " + userComment_TA.getText() ;
 }
 
 private String usernameValid(String username)
