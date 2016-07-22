@@ -145,7 +145,6 @@ public class GUI_Logger extends JPanel implements Runnable {
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						JOptionPane.showMessageDialog(null, "Run");
 						try {
 							reportProgram.createPDF();
 						} catch (FileNotFoundException e1) {

@@ -10,9 +10,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.BaseFont;
@@ -33,17 +34,21 @@ public class ReportingProgram {
 	
 	
 	
-	
-	
-	
-	
 	public void createPDF() throws FileNotFoundException, DocumentException
 	{
 		Document document = new Document();
 		//Setting page to A4
 		document.setPageSize(PageSize.A4.rotate());
 		
-		PdfWriter.getInstance(document, new FileOutputStream("D://Hello.pdf"));
+		FileOutputStream fileOutputStream =getExportLocation();
+		
+		if (fileOutputStream == null)
+		{
+			JOptionPane.showMessageDialog(null,"PDF Export Canceled","PDF Export Canceled",JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+		
+		PdfWriter.getInstance(document, fileOutputStream);
 		
 		document.open();
 		
@@ -70,6 +75,25 @@ public class ReportingProgram {
 		document.close();
 		
 	
+	}
+	
+	private FileOutputStream getExportLocation()
+	{
+		JFileChooser locationChooser = new JFileChooser();
+		locationChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Portable Document Files","pdf");
+		locationChooser.setFileFilter(filter);
+		if(locationChooser.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
+			{
+				File fileToBeWritten = locationChooser.getSelectedFile();
+				try {
+					FileOutputStream stream = new FileOutputStream(fileToBeWritten.toString());
+					return stream;
+				} catch (FileNotFoundException e) {
+					JOptionPane.showMessageDialog(null,"Problem with export","Problem with Export",JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		return null;
 	}
 	
 	private Paragraph generateHeader()
